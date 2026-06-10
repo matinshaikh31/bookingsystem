@@ -5,6 +5,7 @@ import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_text_styles.dart';
 import '../../../auth/domain/models/user_model.dart';
 import 'admin_shell.dart';
+import '../../../../core/const/role.dart';
 
 class AdminUsersPage extends StatelessWidget {
   const AdminUsersPage({super.key});
@@ -80,7 +81,7 @@ class _UserTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isAdmin = user.role == 'admin';
+    final isAdmin = user.role == Roles.admin;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/service/firebase.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_text_styles.dart';
 import '../../../venue/domain/models/venue_model.dart';
+import '../../../venue/data/venue_fb_repo.dart';
 import '../widgets/create_venue_sheet.dart';
 import 'admin_shell.dart';
 
@@ -92,6 +94,38 @@ class _VenueCard extends StatelessWidget {
   final VenueModel venue;
   const _VenueCard({required this.venue});
 
+  Future<void> _deleteVenue(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Venue'),
+        content: Text('Are you sure you want to delete "${venue.name}"? This will remove the venue from database.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete', style: TextStyle(color: AppColors.primary)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && context.mounted) {
+      await context.read<VenueFbRepo>().deleteVenue(venue.id);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('"${venue.name}" deleted successfully'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -100,6 +134,7 @@ class _VenueCard extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
+        boxShadow: AppColors.softShadow,
       ),
       child: Row(
         children: [
@@ -129,9 +164,35 @@ class _VenueCard extends StatelessWidget {
               ],
             ),
           ),
-          Text(
-            '₹${venue.pricePerSlot.toStringAsFixed(0)}',
-            style: AppTextStyles.bodyBold.copyWith(color: AppColors.primary),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '₹${venue.pricePerSlot.toStringAsFixed(0)}',
+                style: AppTextStyles.bodyBold.copyWith(color: AppColors.primary),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit_rounded, size: 18, color: AppColors.textSecondary),
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(4),
+                    tooltip: 'Edit',
+                    onPressed: () => CreateVenueSheet.show(context, venue: venue),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.primary),
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(4),
+                    tooltip: 'Delete',
+                    onPressed: () => _deleteVenue(context),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),

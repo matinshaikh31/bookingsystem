@@ -65,7 +65,28 @@ AppBar buildAdminAppBar(BuildContext context, String title) {
       IconButton(
         tooltip: 'Sign out',
         icon: const Icon(Icons.logout_rounded),
-        onPressed: () => context.read<AuthCubit>().logout(),
+        onPressed: () async {
+          final confirm = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Sign Out'),
+              content: const Text('Are you sure you want to sign out?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('Sign Out', style: TextStyle(color: AppColors.primary)),
+                ),
+              ],
+            ),
+          );
+          if (confirm == true && context.mounted) {
+            context.read<AuthCubit>().logout();
+          }
+        },
       ),
       const SizedBox(width: 4),
     ],

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/const/role.dart';
 
 class UserModel {
   final String uid;
@@ -14,7 +15,7 @@ class UserModel {
     required this.email,
     required this.createdAt,
     this.isDeleted = false,
-    this.role = 'user',
+    this.role = Roles.user,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
@@ -25,7 +26,7 @@ class UserModel {
       email: data['email'] ?? '',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isDeleted: data['isDeleted'] ?? false,
-      role: data['role'] ?? 'user',
+      role: data['role'] ?? Roles.user,
     );
   }
 
@@ -40,7 +41,7 @@ class UserModel {
                 : DateTime.parse(map['createdAt']))
           : DateTime.now(),
       isDeleted: map['isDeleted'] ?? false,
-      role: map['role'] ?? 'user',
+      role: map['role'] ?? Roles.user,
     );
   }
 

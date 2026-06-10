@@ -158,6 +158,8 @@ class AuthCubit extends Cubit<AuthState> {
       return 'No user found with this email';
     } else if (error.contains('wrong-password')) {
       return 'Wrong password';
+    } else if (error.contains('invalid-credential')) {
+      return 'Invalid email or password';
     } else if (error.contains('email-already-in-use')) {
       return 'Email already in use';
     } else if (error.contains('weak-password')) {
@@ -167,7 +169,10 @@ class AuthCubit extends Cubit<AuthState> {
     } else if (error.contains('network-request-failed')) {
       return 'Network error. Please check your connection';
     }
-    return 'An error occurred. Please try again';
+    if (error.contains('] ')) {
+      return error.split('] ').last;
+    }
+    return 'An error occurred: $error';
   }
 
   @override

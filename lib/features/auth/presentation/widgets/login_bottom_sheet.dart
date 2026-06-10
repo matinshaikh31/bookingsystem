@@ -33,6 +33,7 @@ class _LoginBottomSheetState extends State<LoginBottomSheet>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isRegister = false;
+  bool _hasPopped = false;
 
   @override
   void initState() {
@@ -62,11 +63,16 @@ class _LoginBottomSheetState extends State<LoginBottomSheet>
   Widget build(BuildContext context) {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
-        if (state.isAuthenticated) {
-          Navigator.pop(context); // Dismiss the bottom sheet
-          if (widget.navigateToProfile) {
-            context.push(AppRoutes.profile); // Go to profile screen
-          }
+        if (state.isAuthenticated && !_hasPopped) {
+          _hasPopped = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+              Navigator.pop(context); // Dismiss the bottom sheet
+              if (widget.navigateToProfile) {
+                context.push(AppRoutes.profile); // Go to profile screen
+              }
+            }
+          });
         } else if (state.message != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -110,25 +116,7 @@ class _LoginBottomSheetState extends State<LoginBottomSheet>
                     ),
                   ),
 
-                  // Header / Logo Icon
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        gradient: AppColors.primaryGradient,
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: AppColors.redShadow,
-                      ),
-                      child: const Icon(
-                        Icons.flight_takeoff_rounded,
-                        color: Colors.white,
-                        size: 26,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+
 
                   // Title
                   Text(

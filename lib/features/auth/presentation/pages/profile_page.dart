@@ -1,44 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import '../../../../core/helpers/date_helper.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_text_styles.dart';
 import '../../../../core/routing/app_router.dart';
 import '../cubit/auth_cubit.dart';
+import '../widgets/auth_required_placeholder.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  final bool showLeading;
+  const ProfilePage({super.key, this.showLeading = true});
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
         if (!state.isAuthenticated) {
-          // If logged out, redirect to home page
-          context.go(AppRoutes.home);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              context.go(AppRoutes.home);
+            }
+          });
         }
       },
       builder: (context, state) {
         final user = state.currentUser;
         if (user == null) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            ),
+          return const AuthRequiredPlaceholder(
+            title: 'My Profile',
+            message:
+                'Sign in to access your profile settings, view bookings, and manage account preferences.',
+            icon: Icons.person_rounded,
           );
         }
 
-        final joinedDate = DateFormat('MMMM yyyy').format(user.createdAt);
+        final joinedDate = DateHelper.formatToMy(user.createdAt);
 
         return Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(
             title: const Text('My Account'),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
-              onPressed: () => context.go(AppRoutes.home),
-            ),
+            leading: showLeading
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    onPressed: () => context.go(AppRoutes.home),
+                  )
+                : null,
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(1),
               child: Container(color: AppColors.border, height: 1),
@@ -97,7 +105,9 @@ class ProfilePage extends StatelessWidget {
                       const SizedBox(height: 16),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.primaryLight,
                           borderRadius: BorderRadius.circular(100),
@@ -163,7 +173,40 @@ class ProfilePage extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: state.isLoading
                         ? null
-                        : () => context.read<AuthCubit>().logout(),
+                        : () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: const Text('Sign Out'),
+                                content: const Text(
+                                  'Are you sure you want to sign out?',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx, false),
+                                    child: const Text(
+                                      'Cancel',
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx, true),
+                                    child: const Text(
+                                      'Sign Out',
+                                      style: TextStyle(
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirm == true && context.mounted) {
+                              context.read<AuthCubit>().logout();
+                            }
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(
@@ -228,10 +271,7 @@ class ProfilePage extends StatelessWidget {
       ),
       subtitle: Text(
         subtitle,
-        style: const TextStyle(
-          fontSize: 11,
-          color: AppColors.textSecondary,
-        ),
+        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
       ),
       trailing: const Icon(
         Icons.chevron_right_rounded,

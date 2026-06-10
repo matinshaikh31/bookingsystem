@@ -4,6 +4,10 @@ import 'core/themes/app_theme.dart';
 import 'core/routing/app_router.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/auth/data/repository/auth_repo_impl.dart';
+import 'features/venue/data/venue_fb_repo.dart';
+import 'features/venue/presentation/cubit/venue_cubit.dart';
+import 'features/booking/data/booking_fb_repo.dart';
+import 'features/booking/presentation/cubit/booking_cubit.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -15,17 +19,41 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiRepositoryProvider(
       providers: [
-        BlocProvider<AuthCubit>(
-          create: (context) => AuthCubit(authRepo: AuthRepoImpl())..checkAuth(),
+        RepositoryProvider<VenueFbRepo>(
+          create: (context) => const VenueFbRepo(),
+        ),
+        RepositoryProvider<BookingFbRepo>(
+          create: (context) => const BookingFbRepo(),
         ),
       ],
-      child: MaterialApp.router(
-        routerConfig: appRouter,
-        title: 'Booking App',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
+      child: Builder(
+        builder: (context) {
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider<AuthCubit>(
+                create: (context) => AuthCubit(authRepo: AuthRepoImpl())..checkAuth(),
+              ),
+              BlocProvider<VenueCubit>(
+                create: (context) => VenueCubit(
+                  venueFbRepo: context.read<VenueFbRepo>(),
+                ),
+              ),
+              BlocProvider<BookingCubit>(
+                create: (context) => BookingCubit(
+                  bookingFbRepo: context.read<BookingFbRepo>(),
+                ),
+              ),
+            ],
+            child: MaterialApp.router(
+              routerConfig: appRouter,
+              title: 'Booking App',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme,
+            ),
+          );
+        },
       ),
     );
   }
