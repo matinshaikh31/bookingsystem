@@ -6,7 +6,7 @@ A premium mobile application for booking flight and sports venues, featuring rea
 
 ## 🛠️ Tech Stack
 - **Frontend Framework**: Flutter (Dart)
-- **Backend & Database**: Firebase (Authentication & Cloud Firestore with atomic Transactions)
+- **Backend & Database**: Firebase (Authentication & Firestore)
 - **State Management**: flutter_bloc (Cubits)
 - **Theme**: Red & Black Premium Aesthetic (Dark/Goth themed accents)
 
