@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:bookingsystem/core/service/firebase.dart';
 import 'package:bookingsystem/features/auth/domain/entity/auth_repo.dart';
 import 'package:bookingsystem/features/auth/domain/models/user_model.dart';
@@ -26,22 +25,11 @@ class AuthCubit extends Cubit<AuthState> {
   final signupEmailController = TextEditingController();
   final signupPasswordController = TextEditingController();
 
-  bool get _isFirebaseEnabled {
-    try {
-      return Firebase.apps.isNotEmpty;
-    } catch (_) {
-      return false;
-    }
-  }
-
   void checkAuth() {
     authStream = authRepo.authStateChanges().listen((isAuthenticated) async {
       if (isAuthenticated) {
-        String uid = 'mock_uid';
-        if (_isFirebaseEnabled) {
-          uid = FBAuth.auth.currentUser?.uid ?? 'mock_uid';
-        }
-        final userData = await authRepo.getUserData(uid);
+        final uid = FBAuth.auth.currentUser?.uid;
+        final userData = uid != null ? await authRepo.getUserData(uid) : null;
         emit(
           state.copyWith(
             isAuthenticated: true,
@@ -75,11 +63,8 @@ class AuthCubit extends Cubit<AuthState> {
 
         await authRepo.login(email, password);
 
-        String uid = 'mock_uid';
-        if (_isFirebaseEnabled) {
-          uid = FBAuth.auth.currentUser?.uid ?? 'mock_uid';
-        }
-        final userData = await authRepo.getUserData(uid);
+        final uid = FBAuth.auth.currentUser?.uid;
+        final userData = uid != null ? await authRepo.getUserData(uid) : null;
         emit(
           state.copyWith(
             isAuthenticated: true,
@@ -89,6 +74,7 @@ class AuthCubit extends Cubit<AuthState> {
           ),
         );
       } catch (e) {
+        debugPrint('AuthCubit.login error: $e');
         emit(
           state.copyWith(
             isLoading: false,
@@ -111,11 +97,8 @@ class AuthCubit extends Cubit<AuthState> {
 
         await authRepo.signup(email, password, name);
 
-        String uid = 'mock_uid';
-        if (_isFirebaseEnabled) {
-          uid = FBAuth.auth.currentUser?.uid ?? 'mock_uid';
-        }
-        final userData = await authRepo.getUserData(uid);
+        final uid = FBAuth.auth.currentUser?.uid;
+        final userData = uid != null ? await authRepo.getUserData(uid) : null;
         emit(
           state.copyWith(
             isAuthenticated: true,
@@ -125,6 +108,7 @@ class AuthCubit extends Cubit<AuthState> {
           ),
         );
       } catch (e) {
+        debugPrint('AuthCubit.signup error: $e');
         emit(
           state.copyWith(
             isLoading: false,
@@ -155,6 +139,7 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (e) {
+      debugPrint('AuthCubit.logout error: $e');
       emit(
         state.copyWith(
           isLoading: false,

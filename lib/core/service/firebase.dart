@@ -8,6 +8,8 @@ class FBAuth {
 class FBFireStore {
   static final fb = FirebaseFirestore.instance;
   static final users = fb.collection('users');
+  static final venues = fb.collection('venues');
+  static final bookings = fb.collection('bookings');
   static final tasks = fb.collection('tasks');
   static final settings = fb.collection('settings').doc('sets');
   static final customers = fb.collection('customers');

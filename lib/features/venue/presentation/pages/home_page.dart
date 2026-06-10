@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_text_styles.dart';
+import '../../../admin/presentation/pages/admin_shell.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/widgets/login_bottom_sheet.dart';
 
@@ -15,6 +16,9 @@ class HomePage extends StatelessWidget {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
         final user = state.currentUser;
+        if (state.isAuthenticated && user?.role == 'admin') {
+          return const AdminShell();
+        }
         return Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(
@@ -126,7 +130,7 @@ class HomePage extends StatelessWidget {
 
                   // Welcome Typography
                   const Text(
-                    'Welcome to TW Travel',
+                    'Welcome to Venue Booking',
                     style: AppTextStyles.h1,
                     textAlign: TextAlign.center,
                   ),

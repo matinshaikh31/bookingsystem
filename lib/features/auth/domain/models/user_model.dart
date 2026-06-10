@@ -6,6 +6,7 @@ class UserModel {
   final String email;
   final DateTime createdAt;
   final bool isDeleted;
+  final String role;
 
   const UserModel({
     required this.uid,
@@ -13,6 +14,7 @@ class UserModel {
     required this.email,
     required this.createdAt,
     this.isDeleted = false,
+    this.role = 'user',
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
@@ -23,6 +25,7 @@ class UserModel {
       email: data['email'] ?? '',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isDeleted: data['isDeleted'] ?? false,
+      role: data['role'] ?? 'user',
     );
   }
 
@@ -33,10 +36,11 @@ class UserModel {
       email: map['email'] ?? '',
       createdAt: map['createdAt'] != null
           ? (map['createdAt'] is Timestamp
-              ? (map['createdAt'] as Timestamp).toDate()
-              : DateTime.parse(map['createdAt']))
+                ? (map['createdAt'] as Timestamp).toDate()
+                : DateTime.parse(map['createdAt']))
           : DateTime.now(),
       isDeleted: map['isDeleted'] ?? false,
+      role: map['role'] ?? 'user',
     );
   }
 
@@ -46,6 +50,7 @@ class UserModel {
       'email': email,
       'createdAt': Timestamp.fromDate(createdAt),
       'isDeleted': isDeleted,
+      'role': role,
     };
   }
 
@@ -55,6 +60,7 @@ class UserModel {
     String? email,
     DateTime? createdAt,
     bool? isDeleted,
+    String? role,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -62,6 +68,7 @@ class UserModel {
       email: email ?? this.email,
       createdAt: createdAt ?? this.createdAt,
       isDeleted: isDeleted ?? this.isDeleted,
+      role: role ?? this.role,
     );
   }
 }

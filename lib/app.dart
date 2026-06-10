@@ -23,7 +23,7 @@ class _AppState extends State<App> {
       ],
       child: MaterialApp.router(
         routerConfig: appRouter,
-        title: 'TW Travel',
+        title: 'Booking App',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
       ),
